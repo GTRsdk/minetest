@@ -147,12 +147,15 @@ public:
 	bool is_climbing;
 	bool swimming_up;
 	bool camera_barely_in_ceiling;
-	
+
 	u8 light;
 
 	Inventory inventory;
 
 	u16 hp;
+
+	float hurt_tilt_timer;
+	float hurt_tilt_timer_max;
 
 	u16 peer_id;
 
