@@ -70,7 +70,7 @@ void Database_LevelDB::saveBlock(MapBlock *block)
 	// Write block to database
 	std::string tmp = o.str();
 
-	m_database->Put(leveldb::WriteOptions(), itos(getBlockAsInteger(p3d)), tmp);
+	m_database->Put(leveldb::WriteOptions(), i64tos(getBlockAsInteger(p3d)), tmp);
 
 	// We just wrote it to the disk so clear modified flag
 	block->resetModified();
@@ -81,7 +81,7 @@ MapBlock* Database_LevelDB::loadBlock(v3s16 blockpos)
 	v2s16 p2d(blockpos.X, blockpos.Z);
 
 	std::string datastr;
-	leveldb::Status s = m_database->Get(leveldb::ReadOptions(), itos(getBlockAsInteger(blockpos)), &datastr);
+	leveldb::Status s = m_database->Get(leveldb::ReadOptions(), i64tos(getBlockAsInteger(blockpos)), &datastr);
 
         if(s.ok()) {
                 /*
@@ -147,12 +147,12 @@ MapBlock* Database_LevelDB::loadBlock(v3s16 blockpos)
 
 void Database_LevelDB::listAllLoadableBlocks(core::list<v3s16> &dst)
 {
-	/*for(std::map<unsigned long long, std::string>::iterator x = m_database.begin(); x != m_database.end(); ++x)
-	{
-		v3s16 p = getIntegerAsBlock(x->first);
-		//dstream<<"block_i="<<block_i<<" p="<<PP(p)<<std::endl;
-		dst.push_back(p);
-	}*/
+	leveldb::Iterator* it = m_database->NewIterator(leveldb::ReadOptions());
+	for (it->SeekToFirst(); it->Valid(); it->Next()) {
+		dst.push_back(getIntegerAsBlock(mystoi64(it->key().ToString())));
+	}
+	assert(it->status().ok());  // Check for any errors found during the scan
+	delete it;
 }
 
 Database_LevelDB::~Database_LevelDB()

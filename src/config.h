@@ -13,6 +13,7 @@
 #define USE_SOUND 0
 #define STATIC_SHAREDIR ""
 #define BUILD_INFO "non-cmake"
+#define MYSQL_BACKEND 0
 
 #ifdef USE_CMAKE_CONFIG_H
 	#include "cmake_config.h"
@@ -30,6 +31,8 @@
 	#define STATIC_SHAREDIR CMAKE_STATIC_SHAREDIR
 	#undef BUILD_INFO
 	#define BUILD_INFO CMAKE_BUILD_INFO
+	#undef MYSQL_BACKEND
+	#define MYSQL_BACKEND CMAKE_MYSQL_BACKEND
 #endif
 
 #endif

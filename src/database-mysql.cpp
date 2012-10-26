@@ -1,3 +1,4 @@
+#ifdef MYSQL_BACKEND
 /*
 	MySQL format specification:
 	
@@ -409,4 +410,4 @@ Database_MySQL::~Database_MySQL()
 	if(m_database)
 		mysql_close(m_database);
 }
-
+#endif

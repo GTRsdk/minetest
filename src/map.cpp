@@ -2027,26 +2027,39 @@ ServerMap::ServerMap(std::string savedir, IGameDef *gamedef):
 		Try to load map; if not found, create a new one.
 	*/
 
+	// Determine which database backend to use
+	std::string conf_path = savedir + DIR_DELIM + "world.mt";
+	Settings conf;
+	bool succeeded = conf.readConfigFile(conf_path.c_str());
+	if (!succeeded || !conf.exists("backend")) {
+		// fall back to sqlite3
+		dbase = new Database_SQLite3(this, savedir);
+		conf.set("backend", "sqlite3");
+	} else {
+		std::string backend = conf.get("backend");
+		if (backend == "dummy")
+			dbase = new Database_Dummy(this);
+		else if (backend == "sqlite3")
+			dbase = new Database_SQLite3(this, savedir);
+		else if (backend == "mysql") {
+			#ifdef MYSQL_BACKEND
+			if (conf.exists("mysql_server") && conf.exists("mysql_user") && conf.exists("mysql_password") && conf.exists("mysql_database")) {
+				dbase = new Database_MySQL(this, conf.get("mysql_server"), conf.get("mysql_user"), conf.get("mysql_password"), conf.get("mysql_database"));
+			} else {
+				throw BaseException("Please specify mysql_server, mysql_user, mysql_password, mysql_database in your world's world.mt configuration file in order to use MySQL backend.")
+			}
+			#else
+			errorstream << "Please, recompile with -DMYSQL_BACKEND if you want to use MySQL." << std::endl;
+			throw BaseException("MySQL backend is unavailible");
+			#endif
+		} else if (backend == "leveldb")
+			dbase = new Database_LevelDB(this, savedir);
+		else
+			throw BaseException("Unknown map backend");
+	}
+
 	m_savedir = savedir;
 	m_map_saving_enabled = false;
-
-	if (g_settings->exists("mysql_server") && 
-            g_settings->exists("mysql_user") &&
-            g_settings->exists("mysql_password") &&
-            g_settings->exists("mysql_database") ) {
-
-		dbase = new Database_MySQL(this,
-			g_settings->get("mysql_server"),
-			g_settings->get("mysql_user"),
-			g_settings->get("mysql_password"),
-			g_settings->get("mysql_database"),
-			savedir);
-	} else if (g_settings->exists("db_dummy"))
-		dbase = new Database_Dummy(this);
-	else if (g_settings->exists("db_leveldb"))
-		dbase = new Database_LevelDB(this,savedir);
-	else
-		dbase = new Database_SQLite3(this,savedir);
 
 	try
 	{

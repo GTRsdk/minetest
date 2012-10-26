@@ -95,6 +95,7 @@ private:
 	leveldb::DB* m_database;
 };
 
+#ifdef MYSQL_BACKEND
 class Database_MySQL : public Database
 {
 public:
@@ -122,5 +123,6 @@ private:
         void verifyDatabase();
         void createDirs(std::string path);
 };
+#endif
 
 #endif

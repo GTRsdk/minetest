@@ -803,6 +803,8 @@ int main(int argc, char *argv[])
 			_("Set logfile path ('' = no logging)")));
 	allowed_options.insert("gameid", ValueSpec(VALUETYPE_STRING,
 			_("Set gameid (\"--gameid list\" prints available ones)")));
+	allowed_options.insert("migrate", ValueSpec(VALUETYPE_STRING,
+			_("Migrate from current map backend to another")));
 #ifndef SERVER
 	allowed_options.insert("speedtests", ValueSpec(VALUETYPE_FLAG,
 			_("Run speed tests")));
@@ -1075,6 +1077,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+
 	/*
 		Run dedicated server if asked to or no other option
 	*/
@@ -1196,6 +1199,54 @@ int main(int argc, char *argv[])
 
 		// Create server
 		Server server(world_path, configpath, gamespec, false);
+
+		// Database migration
+		if (cmd_args.exists("migrate")) {
+			std::string migrate_to = cmd_args.get("migrate");
+			Settings world_mt;
+			bool success = world_mt.readConfigFile((world_path + DIR_DELIM + "world.mt").c_str());
+			if (!success) {
+				errorstream << "Cannot read world.mt" << std::endl;
+				return 1;
+			}
+			if (!world_mt.exists("backend")) {
+				errorstream << "Please specify your current backend in world.mt file:" << std::endl << "	backend = {sqlite3|mysql|leveldb|dummy}" << std::endl;
+				return 1;
+			}
+			std::string backend = world_mt.get("backend");
+			Database *new_db;
+			if (backend == migrate_to) {
+				errorstream << "Cannot migrate: new backend is same as the old one" << std::endl;
+				return 1;
+			}
+			if (migrate_to == "sqlite3")
+				new_db = new Database_SQLite3(&(ServerMap&)server.getEnv()->getMap(), world_path);
+			else if (migrate_to == "leveldb")
+				new_db = new Database_LevelDB(&(ServerMap&)server.getEnv()->getMap(), world_path);
+			else {
+				errorstream << "Migration to " << migrate_to << " is not supported" << std::endl;
+				return 1;
+			}
+
+			core::list<v3s16> blocks;
+			ServerMap &old_map = ((ServerMap&)server.getEnv()->getMap());
+			old_map.listAllLoadableBlocks(blocks);
+			int count = 0;
+			new_db->beginSave();
+			for (core::list<v3s16>::Iterator i = blocks.begin(); i != blocks.end(); ++i) {
+				new_db->saveBlock(old_map.loadBlock(*i));
+				++count;
+				if (count % 500 == 0)
+					actionstream << "Migrated " << count << " blocks" << std::endl;
+			}
+			new_db->endSave();
+
+			actionstream << "Successfully migrated " << count << " blocks" << std::endl;
+			actionstream << "Don't forget to update your world.mt backend setting!" << std::endl;
+
+			return 0;
+		}
+
 		server.start(port);
 		
 		// Run server
