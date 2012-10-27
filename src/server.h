@@ -582,6 +582,8 @@ public:
 		m_async_fatal_error.set(error);
 	}
 
+	Map & getMap() { return m_env->getMap(); }
+
 private:
 
 	// con::PeerHandler implementation.

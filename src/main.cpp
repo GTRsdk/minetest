@@ -1220,16 +1220,16 @@ int main(int argc, char *argv[])
 				return 1;
 			}
 			if (migrate_to == "sqlite3")
-				new_db = new Database_SQLite3(&(ServerMap&)server.getEnv()->getMap(), world_path);
+				new_db = new Database_SQLite3(&(ServerMap&)server.getMap(), world_path);
 			else if (migrate_to == "leveldb")
-				new_db = new Database_LevelDB(&(ServerMap&)server.getEnv()->getMap(), world_path);
+				new_db = new Database_LevelDB(&(ServerMap&)server.getMap(), world_path);
 			else {
 				errorstream << "Migration to " << migrate_to << " is not supported" << std::endl;
 				return 1;
 			}
 
 			core::list<v3s16> blocks;
-			ServerMap &old_map = ((ServerMap&)server.getEnv()->getMap());
+			ServerMap &old_map = ((ServerMap&)server.getMap());
 			old_map.listAllLoadableBlocks(blocks);
 			int count = 0;
 			new_db->beginSave();
