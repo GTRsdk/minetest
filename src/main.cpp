@@ -1210,7 +1210,8 @@ int main(int argc, char *argv[])
 				return 1;
 			}
 			if (!world_mt.exists("backend")) {
-				errorstream << "Please specify your current backend in world.mt file:" << std::endl << "	backend = {sqlite3|mysql|leveldb|dummy}" << std::endl;
+				errorstream << "Please specify your current backend in world.mt file:"
+					<< std::endl << "	backend = {sqlite3|mysql|leveldb|dummy}" << std::endl;
 				return 1;
 			}
 			std::string backend = world_mt.get("backend");
@@ -1234,10 +1235,14 @@ int main(int argc, char *argv[])
 			int count = 0;
 			new_db->beginSave();
 			for (core::list<v3s16>::Iterator i = blocks.begin(); i != blocks.end(); ++i) {
-				new_db->saveBlock(old_map.loadBlock(*i));
+				MapBlock *block = old_map.loadBlock(*i);
+				new_db->saveBlock(block);
+				MapSector *sector = old_map.getSectorNoGenerate(v2s16(i->X, i->Z));
+				sector->deleteBlock(block);
 				++count;
 				if (count % 500 == 0)
-					actionstream << "Migrated " << count << " blocks" << std::endl;
+					actionstream << "Migrated " << count << " blocks "
+						<< (100.0 * count / blocks.size()) << "\% completed" << std::endl;
 			}
 			new_db->endSave();
 
