@@ -153,9 +153,6 @@ public:
 
 	u16 hp;
 
-	float hurt_tilt_timer;
-	float hurt_tilt_timer_max;
-
 	u16 peer_id;
 
 	std::string inventory_formspec;

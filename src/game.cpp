@@ -1228,6 +1228,7 @@ void the_game(
 	bool digging = false;
 	bool ldown_for_dig = false;
 
+	float damage_flash_timer = 0;
 	s16 farmesh_range = 20*MAP_BLOCKSIZE;
 
 	const float object_hit_delay = 0.2;
@@ -1268,10 +1269,6 @@ void the_game(
 	// NOTE: getRealTime() causes strange problems in wine (imprecision?)
 	// NOTE: So we have to use getTime() and call run()s between them
 	u32 lasttime = device->getTimer()->getTime();
-
-	LocalPlayer* player = client.getEnv().getLocalPlayer();
-	player->hurt_tilt_timer=0;
-	player->hurt_tilt_timer_max=0;
 
 	for(;;)
 	{
@@ -1933,11 +1930,10 @@ void the_game(
 				{
 					//u16 damage = event.player_damage.amount;
 					//infostream<<"Player damage: "<<damage<<std::endl;
-					player->hurt_tilt_timer = 0.5;
+					damage_flash_timer = 0.05;
 					if(event.player_damage.amount >= 2){
-						player->hurt_tilt_timer += 0.1 * event.player_damage.amount;
+						damage_flash_timer += 0.05 * event.player_damage.amount;
 					}
-					player->hurt_tilt_timer_max=player->hurt_tilt_timer;
 				}
 				else if(event.type == CE_PLAYER_FORCE_MOVE)
 				{
@@ -1966,9 +1962,8 @@ void the_game(
 					chat_backend.addMessage(L"", L"You died.");
 
 					/* Handle visualization */
-					LocalPlayer* player = client.getEnv().getLocalPlayer();
-					player->hurt_tilt_timer = 0;
-					player->hurt_tilt_timer_max = 0;
+
+					damage_flash_timer = 0;
 
 					/*LocalPlayer* player = client.getLocalPlayer();
 					player->setPosition(player->getPosition() + v3f(0,-BS,0));
@@ -2832,15 +2827,17 @@ void the_game(
 		}
 
 		/*
-			Damage camera tilt
+			Damage flash
 		*/
-		if(player->hurt_tilt_timer > 0.0)
+		if(damage_flash_timer > 0.0)
 		{
-			player->hurt_tilt_timer -= dtime*5;
-			if(player->hurt_tilt_timer < 0.0)
-				player->hurt_tilt_timer_max = 0;
-		}
+			damage_flash_timer -= dtime;
 
+			video::SColor color(128,255,0,0);
+			driver->draw2DRectangle(color,
+					core::rect<s32>(0,0,screensize.X,screensize.Y),
+					NULL);
+		}
 
 		/*
 			End scene
