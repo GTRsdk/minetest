@@ -121,6 +121,11 @@ function minetest.register_item(name, itemdef)
 	if itemdef.type == "node" and itemdef.liquidtype == "flowing" then
 		itemdef.paramtype2 = "flowingliquid"
 	end
+	
+	-- Support old field liquid_viscosity
+	if itemdef.type == "node" and itemdef.liquid_viscosity then
+		itemdef.groups.liquid = itemdef.liquid_viscosity
+	end
 
 	-- BEGIN Legacy stuff
 	if itemdef.cookresult_itemstring ~= nil and itemdef.cookresult_itemstring ~= "" then
