@@ -458,6 +458,7 @@ Special groups
 - bouncy: value is bounce speed in percent
 - solid: If not 0, objects collide with node
 - liquid = viscosity : Defines the viscosity of a liquid. 0 is endless (behaves like vacuum/air), the higher the value the less viscous is the liquid
+- falling_node: if there is no walkable block under the node it will fall
 
 Known damage and digging time defining groups
 ----------------------------------------------
