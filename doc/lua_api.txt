@@ -1232,6 +1232,8 @@ Object Properties
     is_visible = true,
     makes_footstep_sound = false,
     automatic_rotate = false,
+    sticky = false, -- if set to true minetest will not unload blocks near
+                    -- that object
 }
 
 Entity definition (register_entity)

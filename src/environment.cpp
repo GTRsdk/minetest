@@ -992,7 +992,22 @@ void ServerEnvironment::step(float dtime)
 					floatToInt(player->getPosition(), BS));
 			players_blockpos.push_back(blockpos);
 		}
-		
+
+		// don't unload "sticky" entities and blocks near them
+		for(core::map<u16, ServerActiveObject*>::Iterator
+			i = m_active_objects.getIterator();
+			i.atEnd()==false; i++)
+		{
+			ServerActiveObject* obj = i.getNode()->getValue();
+			if(obj->getType() == ACTIVEOBJECT_TYPE_PLAYER)
+				continue;
+			if (obj->accessObjectProperties()->sticky) {
+				v3s16 blockpos = getNodeBlockPos(
+					  floatToInt(obj->getBasePosition(), BS));
+				players_blockpos.push_back(blockpos);
+			}
+		}
+
 		/*
 			Update list of active blocks, collecting changes
 		*/

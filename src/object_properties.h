@@ -39,6 +39,7 @@ struct ObjectProperties
 	bool is_visible;
 	bool makes_footstep_sound;
 	float automatic_rotate;
+	bool sticky;
 
 	ObjectProperties();
 	std::string dump();

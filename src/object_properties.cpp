@@ -35,7 +35,8 @@ ObjectProperties::ObjectProperties():
 	initial_sprite_basepos(0,0),
 	is_visible(true),
 	makes_footstep_sound(false),
-	automatic_rotate(0)
+	automatic_rotate(0),
+	sticky(false)
 {
 	textures.push_back("unknown_object.png");
 }
@@ -59,6 +60,7 @@ std::string ObjectProperties::dump()
 	os<<", is_visible="<<is_visible;
 	os<<", makes_footstep_sound="<<makes_footstep_sound;
 	os<<", automatic_rotate="<<automatic_rotate;
+	os<<", sticky="<<sticky;
 	return os.str();
 }
 
@@ -81,6 +83,7 @@ void ObjectProperties::serialize(std::ostream &os) const
 	writeU8(os, is_visible);
 	writeU8(os, makes_footstep_sound);
 	writeF1000(os, automatic_rotate);
+	writeU8(os, sticky);
 }
 
 void ObjectProperties::deSerialize(std::istream &is)
@@ -106,7 +109,10 @@ void ObjectProperties::deSerialize(std::istream &is)
 	makes_footstep_sound = readU8(is);
 	try{
 		automatic_rotate = readF1000(is);
-	}catch(SerializationError &e){}
+	}catch(SerializationError &e){return;}
+	try{
+		sticky = readU8(is);
+	}catch(SerializationError &e){return;}
 }
 
 
