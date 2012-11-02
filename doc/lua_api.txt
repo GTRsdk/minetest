@@ -1347,6 +1347,7 @@ Node definition (register_node)
     liquidtype = "none", -- "none"/"source"/"flowing"
     liquid_alternative_flowing = "", -- Flowing version of source liquid
     liquid_alternative_source = "", -- Source version of flowing liquid
+    liquid_viscosity = 0, -- Deprecated; use the liquid group instead
     light_source = 0, -- Amount of light emitted by node
     damage_per_second = 0, -- If player is inside node, this damage is caused
     node_box = {type="regular"}, -- See "Node boxes"
